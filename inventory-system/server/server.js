@@ -2,6 +2,10 @@ import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
+// After MongoDB connection
+import productRoutes from './routes/productRoutes.js';
+import multer from 'multer';
+import bulkUploadRoutes from './routes/bulkUploadRoutes.js';
 
 // Load environment variables
 dotenv.config();
@@ -13,6 +17,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+
 // MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('Connected to MongoDB'))
@@ -22,6 +27,11 @@ mongoose.connect(process.env.MONGODB_URI)
 app.get('/', (req, res) => {
   res.send('Inventory Management System API');
 });
+
+// Add this before app.listen()
+app.use('/api/products', productRoutes);
+// Add routes
+app.use('/api', bulkUploadRoutes);
 
 // Start server
 const PORT = process.env.PORT || 5000;
