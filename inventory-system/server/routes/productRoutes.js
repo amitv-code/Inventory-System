@@ -23,4 +23,33 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Update the bulk update endpoint
+router.patch('/bulk', async (req, res) => {
+  try {
+    const updates = req.body;
+    
+    const bulkOps = updates.map(update => ({
+      updateOne: {
+        filter: { _id: update._id },
+        update: { 
+          $set: {
+            ...update.changes,
+            // Convert numeric fields explicitly
+            price: update.changes.price ? Number(update.changes.price) : undefined,
+            currentStock: update.changes.currentStock ? Number(update.changes.currentStock) : undefined
+          }
+        }
+      }
+    }));
+
+    const result = await Product.bulkWrite(bulkOps);
+    res.json({
+      message: `Updated ${result.nModified} products`,
+      result
+    });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+});
+
 export default router;
